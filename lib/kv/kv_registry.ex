@@ -1,10 +1,10 @@
-defmodule KVRegistry do
+defmodule KV.Registry do
     use GenServer
-    require Logger
 
-    def start_link(event_manager, opts \\ []) do
+    def start_link(name) do
+        {:ok, manager} = :gen_event.start_link()
         # 1. start_link now expects the event manager as argument
-        GenServer.start_link(__MODULE__, event_manager, opts)
+        GenServer.start_link(__MODULE__, manager, name: name)
     end
     
     def stop(server) do
@@ -37,12 +37,12 @@ defmodule KVRegistry do
         if Map.has_key?(state.names, name) do
             {:noreply, state}
         else
-            {:ok, pid} = KVBucket.start_link()
-            ref = Process.monitor(pid)
+            {:ok, pid} = KV.Bucket.Supervisor.start_bucket()
+            ref = Process.monitor(pid) # 开始监视调用进程中的给定项
             refs = Map.put(state.refs, ref, name)
             names = Map.put(state.names, name, pid)
             # 3. Push a notification to the event manager on create
-            GenEvent.sync_notify(state.events, {:create, name, pid})# 向事件管理器发送事件通知
+            # :gen_event.sync_notify(state.events, {:create, name, pid})# 向事件管理器发送事件通知
             {:noreply, %{state | names: names, refs: refs}}
         end
     end
@@ -53,7 +53,7 @@ defmodule KVRegistry do
         {name, refs} = Map.pop(state.refs, ref)
         names = Map.delete(state.names, name)
         # 4. Push a notification to the event manager on exit
-        GenEvent.sync_notify(state.events, {:exit, name, pid})
+        # :gen_event.sync_notify(state.events, {:exit, name, pid})
         {:noreply, %{state | names: names, refs: refs}}
     end
 
