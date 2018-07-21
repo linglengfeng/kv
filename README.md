@@ -9,3 +9,14 @@ mix.exs
 
 介绍观察者工具（Observer tool。 该工具和Erlang一同推出。使用iex -S mix启动你的应用程序，输入：iex> :observer.start
 
+give_away(Tab, Pid, GiftData) -> true
+让进程Pid成为表Tab的新的拥有者。
+     Types:
+        Tab = tid() | atom()
+         Pid = pid()
+         GiftData = term()
+
+ets:new(Name, Options)
+:ets.new(:shopping, [ :bag, :protected, :named_table, read_concurrency: true,[:heir, pid, []] ])
+    {heir, Pid, HeirData},{heir,none}
+    这个heir属性指明当创建table的process终止时，是否有其他process来继承这个table，默认值是{heir,none},表示没有继承者，所以当创建表的process终止时，表也随之被delete；若我们指定了{heir,Pid,HeirData}，那么当创建表的process终止时，process identifer为Pid的process将会收到一个消息：{'ETS-TRANSFER',tid(),FromPid,HeirData},这样表的拥有权就转交了，

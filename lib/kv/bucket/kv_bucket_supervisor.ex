@@ -1,10 +1,10 @@
 defmodule KV.Bucket.Supervisor do
     use Supervisor
 
-    @name KV.Bucket.Supervisor
+    # @name KV.Bucket.Supervisor
 
-    def start_link() do
-        Supervisor.start_link(__MODULE__, :ok, name: @name)
+    def start_link(opts) do
+        Supervisor.start_link(__MODULE__, :ok, opts)
     end
 
     # 定义了函数start_bucket/0来启动每个bucket， 
